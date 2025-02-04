@@ -41,3 +41,41 @@ class UserRegisterView(View):
             messages.success(request, _('we sent you a code'))
             return redirect('core:verify_code')
         return render(request, 'user_register.html', {'form':form})
+    
+
+
+
+class UserRegisterCodeView(View):
+    form_class=VerifyCodeForm
+    def get(self, request):
+        form = self.form_class
+        return render(request, 'verify_code.html', {'form':form})
+
+    def post(self, request):
+        user_session = request.session['user_registration_info']
+        code_instance =OtpCode.objects.get(phone_number=user_session['phone_number'])
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            now = datetime.now(tz=pytz.timezone('Asia/Tehran'))
+            expired_time = code_instance.date_time_created + timedelta (minutes=2)
+            if OtpCode:
+                if now > expired_time:
+                    code_instance.delete()
+                    messages.error(request, _('your code time is out'))
+                    return redirect ('core:user_register')          
+            if now > expired_time:
+                code_instance.delete()
+                messages.error(request, _('your code time is out'))
+                return redirect ('core:verify_code')
+            
+            if cd['code']==code_instance.code:
+                user=MyUser.objects.create_user(user_session['phone_number'], user_session['first_name'], user_session['last_name'], user_session['password'])
+                code_instance.delete()
+                messages.success(request, _('you register'))
+                login(request, user)
+                return redirect('products:product_list')
+            else:
+                messages.error(request, _('this code is wrong'))
+                return redirect('core:verify_code')
+        return redirect('products:product_list')
