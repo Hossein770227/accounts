@@ -101,3 +101,24 @@ def logout_view(request):
         logout(request)
         messages.error(request, _('you successfully logouted'))
         return redirect('products:product_list')
+
+def logout_view(request):
+    if request.method =='POST':
+        logout(request)
+        messages.error(request, _('you successfully logouted'))
+        return redirect('products:product_list')
+
+# password change
+
+def password_change_view(request):
+    if request.method =='POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request,form.user)
+            messages.success(request, _('your password successfully changed'))
+            return redirect('products:product_list')
+        return redirect('core:change_password')
+    else:
+        form = PasswordChangeForm(user=request.user)
+    return render(request, 'password_change.html',{'form':form})
