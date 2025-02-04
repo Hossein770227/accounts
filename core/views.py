@@ -64,18 +64,40 @@ class UserRegisterCodeView(View):
                     code_instance.delete()
                     messages.error(request, _('your code time is out'))
                     return redirect ('core:user_register')          
-            if now > expired_time:
-                code_instance.delete()
-                messages.error(request, _('your code time is out'))
-                return redirect ('core:verify_code')
-            
-            if cd['code']==code_instance.code:
-                user=MyUser.objects.create_user(user_session['phone_number'], user_session['first_name'], user_session['last_name'], user_session['password'])
-                code_instance.delete()
-                messages.success(request, _('you register'))
-                login(request, user)
-                return redirect('products:product_list')
+                
+                if cd['code']==code_instance.code:
+                    user=MyUser.objects.create_user(user_session['phone_number'], user_session['first_name'], user_session['last_name'], user_session['password'])
+                    code_instance.delete()
+                    messages.success(request, _('you register'))
+                    login(request, user)
+                    return redirect('products:product_list')
+                else:
+                    messages.error(request, _('this code is wrong'))
+                    return redirect('core:verify_code')
             else:
-                messages.error(request, _('this code is wrong'))
-                return redirect('core:verify_code')
+                messages.error(request, _('there is not exist code for your phone number'))
+                return redirect('core:user_register')
+        return redirect('core:verify_code')
+
+
+    
+def login_view(request):
+    if request.method =='POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user =form.get_user()
+            if user:
+                login(request, user)
+                messages.success(request, _('you successfully login'))
+                return redirect('products:product_list')
+            messages.success(request, _('login field'))
+            return redirect('core:login')    
+    form = AuthenticationForm()
+    return render(request, 'login.html', {'form':form})
+
+
+def logout_view(request):
+    if request.method =='POST':
+        logout(request)
+        messages.error(request, _('you successfully logouted'))
         return redirect('products:product_list')
