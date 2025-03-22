@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import authenticate
 
 
 from .models import MyUser
@@ -57,6 +58,30 @@ class UserRegisterForm(forms.Form):
         return cd['password2']
 
 
+class PhoneLogin(forms.Form):
+    phone_number = forms.CharField(
+        label=_('phone number'),
+        widget=forms.TextInput(attrs={'placeholder': '09xxxxxxxxx'})
+    )
+    password = forms.CharField(
+        label=_('password'),
+        widget=forms.PasswordInput
+    )
+
+    def clean(self):
+        phone_number = self.cleaned_data.get('phone_number')
+        password = self.cleaned_data.get('password')
+
+        if phone_number and password:
+            user = authenticate(phone_number=phone_number, password=password)
+            if user is None:
+                raise ValidationError(_('The phone number or password is incorrect.'))
+            self.user_cache = user
+        return self.cleaned_data
+
+    def get_user(self):
+        return self.user_cache
+    
 
 class VerifyCodeForm(forms.Form):
     code =forms.IntegerField()

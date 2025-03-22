@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 import pytz
 
 
-from .forms import UserRegisterForm, VerifyCodeForm
+from .forms import PhoneLogin, UserRegisterForm, VerifyCodeForm
 from utils import send_otp_code
 from .models import OtpCode, MyUser
 
@@ -82,31 +82,26 @@ class UserRegisterCodeView(View):
 
     
 def login_view(request):
-    if request.method =='POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user =form.get_user()
-            if user:
+        if request.method == 'POST':
+            form = PhoneLogin(request.POST)
+            if form.is_valid():
+                user = form.get_user()
                 login(request, user)
-                messages.success(request, _('you successfully login'))
                 return redirect('products:product_list')
-            messages.success(request, _('login field'))
-            return redirect('core:login')    
-    form = AuthenticationForm()
-    return render(request, 'login.html', {'form':form})
-
-
+            messages.success(request, _('login field! Your information is incorrect'))
+            return redirect('core:login')   
+        else:
+            form = PhoneLogin()
+        return render(request, 'login.html', {'form':form})
+ 
+ 
 def logout_view(request):
     if request.method =='POST':
         logout(request)
         messages.error(request, _('you successfully logouted'))
         return redirect('products:product_list')
 
-def logout_view(request):
-    if request.method =='POST':
-        logout(request)
-        messages.error(request, _('you successfully logouted'))
-        return redirect('products:product_list')
+
 
 # password change
 
