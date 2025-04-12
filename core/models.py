@@ -2,13 +2,14 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser
+from django.core.validators import RegexValidator
 
 from .managers import MyUserManager
 
 class MyUser(AbstractBaseUser):
     first_name= models.CharField(verbose_name=_('first name'), max_length=100)
     last_name= models.CharField(verbose_name=_('last name'), max_length=100)
-    phone_number =  models.CharField(verbose_name=_('phone number'), max_length=11, unique=True)
+    phone_number =  models.CharField(verbose_name=_('phone number'), max_length=15, unique=True)
     is_active = models.BooleanField(default=True)
     is_admin =models.BooleanField(default=False)
 

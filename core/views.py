@@ -2,7 +2,6 @@ import random
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from django.utils.translation import gettext as _
 from django.contrib.auth.forms import PasswordChangeForm

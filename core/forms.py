@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate
 
 
+from .validators import validate_iranian_phone
 from .models import MyUser
 
 class UserCreationForm(forms.ModelForm):
@@ -39,7 +40,7 @@ class UserChangeForm(forms.ModelForm):
 class UserRegisterForm(forms.Form):
     first_name= forms.CharField(label=_('first name'),max_length=100, required=True)
     last_name= forms.CharField(label=_('last name'),max_length=100, required=True)
-    phone = forms.CharField(label=_('phone number'),max_length=11, required=True)
+    phone = forms.CharField(label=_('phone number'),max_length=15, required=True, validators=[validate_iranian_phone])
     password1 = forms.CharField(label=_('password'),widget=forms.PasswordInput)
     password2 = forms.CharField(label=_('confirm password'),widget=forms.PasswordInput)
 
@@ -61,6 +62,7 @@ class UserRegisterForm(forms.Form):
 class PhoneLogin(forms.Form):
     phone_number = forms.CharField(
         label=_('phone number'),
+        max_length=11,
         widget=forms.TextInput(attrs={'placeholder': '09xxxxxxxxx'})
     )
     password = forms.CharField(
@@ -81,6 +83,7 @@ class PhoneLogin(forms.Form):
 
     def get_user(self):
         return self.user_cache
+    
     
 
 class VerifyCodeForm(forms.Form):
